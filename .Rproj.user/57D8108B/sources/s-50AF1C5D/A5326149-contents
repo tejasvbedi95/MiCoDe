@@ -1,0 +1,191 @@
+---
+title: "WSBM"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Results {.tabset}
+
+### Pearson {.tabset}
+
+#### Preliminary Analysis
+
+![](../plots/Pearson/pearson_boxplot.png)
+
+#### Compositional Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Pearson/pearson_comp_auto.png)
+![Barplot of K](../plots/Pearson/pearson_comp_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Pearson/pearson_comp_auto_1.png)
+
+![Barplot of K](../plots/Pearson/pearson_comp_bar_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Pearson/pearson_comp_auto_2.png)
+
+![Barplot of K](../plots/Pearson/pearson_comp_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Pearson/pearson_comp_auto_3.png)
+
+![Barplot of K](../plots/Pearson/pearson_comp_bar_3.png)
+###
+
+#### CLR Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Pearson/pearson_CLR_auto.png)
+![Barplot of K](../plots/Pearson/pearson_CLR_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Pearson/pearson_CLR_auto_1.png)
+
+![Barplot of K](../plots/Pearson/pearson_CLR_bar_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Pearson/pearson_CLR_auto_2.png)
+
+![Barplot of K](../plots/Pearson/pearson_CLR_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Pearson/pearson_CLR_auto_3.png)
+
+![Barplot of K](../plots/Pearson/pearson_CLR_bar_3.png)
+
+
+### Spearman {.tabset}
+
+#### Preliminary Analysis
+
+![](../plots/Spearman/spear_boxplots.png)
+
+#### Compositional Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Spearman/spear_comp_auto.png)
+![Barplot of K](../plots/Spearman/spear_comp_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Spearman/spear_comp_auto_1.png)
+
+![Barplot of K](../plots/Spearman/spear_comp_bar_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Spearman/spear_comp_auto_2.png)
+
+![Barplot of K](../plots/Spearman/spear_comp_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Spearman/spear_comp_auto_3.png)
+
+![Barplot of K](../plots/Spearman/spear_comp_bar_3.png)
+
+
+#### CLR Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Spearman/spear_CLR_auto.png)
+![Barplot of K](../plots/Spearman/spear_CLR_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Spearman/spear_CLR_auto_1.png)
+
+![Barplot of K](../plots/Spearman/spear_CLR_bar_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Spearman/spear_CLR_auto_2.png)
+
+![Barplot of K](../plots/Spearman/spear_CLR_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Spearman/spear_CLR_auto_3.png)
+
+![Barplot of K](../plots/Spearman/spear_CLR_bar_3.png)
+####
+###
+
+### Kendall {.tabset}
+
+#### Preliminary Analysis
+
+![](../plots/Kendall/ken_barplot.png)
+
+#### Compositional Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Kendall/ken_comp_auto.png)
+![Barplot of K](../plots/Kendall/ken_comp_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Kendall/ken_comp_auto_1.png)
+
+![Barplot of K](../plots/Kendall/ken_comp_bar_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Kendall/ken_comp_auto_2.png)
+
+![Barplot of K](../plots/Kendall/ken_comp_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Kendall/ken_comp_auto_3.png)
+
+![Barplot of K](../plots/Kendall/ken_comp_auto_3.png)
+
+
+#### CLR Data {.tabset}
+
+##### All Groups
+
+![Heatmap](../plots/Kendall/ken_CLR_auto.png)
+![Barplot of K](../plots/Kendall/ken_CLR_bar.png)
+
+##### Group 1
+
+![Heatmap](../plots/Kendall/ken_CLR_auto_1.png)
+
+![Barplot of K](../plots/Kendall/ken_CLR_auto_1.png)
+
+##### Group 2
+
+![Heatmap](../plots/Kendall/ken_CLR_auto_2.png)
+
+![Barplot of K](../plots/Kendall/ken_CLR_bar_2.png)
+
+
+##### Group 3
+
+![Heatmap](../plots/Kendall/ken_CLR_auto_3.png)
+
+![Barplot of K](../plots/Kendall/ken_CLR_bar_3.png)
