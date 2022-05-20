@@ -76,7 +76,7 @@ g2 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col)) +
 
 ggarrange(g1, g2)
 ```
-![alt text](Results/res_plot_1.pdf)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/sim_plot_1.pdf)
 
 ``` r
 # Fit the permutated data to WSBM function
@@ -106,7 +106,7 @@ g3 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col)) +
 
 g3 # Plot of clustering result
 ```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/sim_plot_2.pdf)
 
 ``` r
 # External cluster validation
@@ -177,7 +177,7 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
 ggarrange(g4, g5)
 
 ```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/res_plot_1.pdf)
 
 ``` r
 # Estimation of K
@@ -191,7 +191,7 @@ barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K"
 plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
 ```
 
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/res_plot_2.pdf)
 
 
 
