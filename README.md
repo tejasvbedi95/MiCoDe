@@ -76,7 +76,7 @@ g2 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col)) +
 
 ggarrange(g1, g2)
 ```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
+![alt text](Results/res_plot_1.pdf)
 
 ``` r
 # Fit the permutated data to WSBM function
