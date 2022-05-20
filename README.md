@@ -106,7 +106,7 @@ g3 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col)) +
 
 g3 # Plot of clustering result
 ```
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/sim_plot_2.pdf)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/869feea52aacf5367593158f11f446f9c3f0c003/plots/Pearson/DM_pearson_CLR_auto.png)
 
 ``` r
 # External cluster validation
