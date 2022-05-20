@@ -1,4 +1,8 @@
-// Estimation of K via stick-breaking process without marginalization
+// Estimation of K via stick-breaking process
+// W = weight matrix (correlation matrix with diagonals set to 0)
+// K_max = upper bound for total no. of clusters
+// eta0 = Dirichlet process concentration parameter 
+
 
 #include <RcppArmadilloExtensions/sample.h>
 #include <RcppDist.h>
@@ -29,10 +33,11 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
   Var.fill(0.1);
   double LogL = 0.0;
   double SS0 = 0.1, nu0 = 10.0, mu0 = 0.0, n0 = 1.0;
-  int K_start = randi(1, distr_param(1, K))(0);
-  Col<int> z = randi(n, distr_param(0, K_start - 1));
-  //Col<int> z(n, fill::zeros);
+  //int K_start = randi(1, distr_param(1, K))(0);
+  //Col<int> z = randi(n, distr_param(0, K_start - 1));
+  Col<int> z(n, fill::zeros);
   Col<int> z_temp = z;
+  Mat<int> ppm_store(n, n, fill::zeros);
   
   Col<double> sampler(K, fill::zeros);
   for(int k = 0; k < K; k++){
@@ -112,7 +117,7 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
   }
   
   
-
+  
   
   //Rcout<<sum(vectorise(A.elem(find(z == 1), find(z == 1))))<<"\n";
   //Rcout<<rbeta(1, 1 + matrix_n1(1, 1), 1 + matrix_n0(1, 1))(0)<<"\n";
@@ -148,9 +153,9 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
     }
     //Rcout << exp(log_alpha.t()) << "\n";
     
-   // if(store){
-   //   alpha_mat.row(it) = exp(log_alpha.t());
-   // }
+    // if(store){
+    //   alpha_mat.row(it) = exp(log_alpha.t());
+    // }
     
     // Update z
     
@@ -266,7 +271,24 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
         mu_store.slice(it - burn) = mu;
         var_store.slice(it - burn) = Var;
       }
+      // Update PPM
+      
+      for(int i = 0; i < n; i++){
+        for(int ii = i; ii < n; ii++){
+          if(ii != i){
+            if(z_store(it, ii) == z_store(it, i)){
+              ppm_store(i, ii) = ppm_store(i, ii) + 1;
+              ppm_store(ii, i) = ppm_store(ii, i) + 1;
+            }
+          }
+        }
+      }
+      
     }
+    
+    
+    
+    
     
     if(it*100/iter == count){
       Rcout<<count<< "% has been done\n";
@@ -284,6 +306,7 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
                             Rcpp::Named("mu_store") = mu_store,
                             Rcpp::Named("Var") = Var,
                             Rcpp::Named("var_store") = var_store,
+                            Rcpp::Named("ppm_store") = ppm_store,
                             Rcpp::Named("LogL") = LogL,
                             Rcpp::Named("logpost_store") = logpost_store
   );

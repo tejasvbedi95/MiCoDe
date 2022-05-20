@@ -1,41 +1,16 @@
-# Microbiome Network Analysis
- 
-## Tutorial
+# Load Libraries
 
-The following script is used to fit a Weighted Stochastic Infinite Block Model (WSIBM) to analyze real valued weighted adjacency matrices. We consider data in the form of a correlation matrix obtained by performing central log ratio transformation (CLR) on microbiome count data (taxonomic abundance table). WSIBM performs model-based clustering on the correlation matrix in order to detect the latent community structure as well as estimate the distribution of number of communities via Dirichlet Process stick-breaking. We further evaluate the posterior summaries via Posterior Probability Matrix (PPM) which enables us to solve the label switching problem of clustering. 
-
-## Required Packages
-
-```r
 library(Rcpp)
 library(tidyverse)
 library(mcclust)
 library(MASS)
 library(ggpubr)
-```
 
-## Required Functions
-
-```r
+# Load functions
 sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM
 source("scripts/functions.R")
-```
 
-## Simulation Study
-
-The following are the data components and model parameters:
-
--   `n`: Number of nodes (taxa) in the network 
--   `W`: Weighted adjacency matrix (correlation matrix with diagonals set to 0)
--   `K`: Number of communities
--   `z`: Latent community membership vector
--   `mu`: Matrix of weighted block means
--   `var`: Matrix of weighted block variance
--   `Kmax`: Upper bound over K
--   `eta0`: Dirichlet process concentration parameter 
-
-
-``` r
+######################## Simulation Study #################################
 # Simulating the data 
 n <- 100
 K <- 4
@@ -75,10 +50,7 @@ g2 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col)) +
   labs(title = "Permutated Data")
 
 ggarrange(g1, g2)
-```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
 
-``` r
 # Fit the permutated data to WSBM function
 
 res <- auto_WSBM(cor.mat.temp, K_max = 20, eta0 = 1, store = T) 
@@ -105,10 +77,7 @@ g3 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col)) +
   labs(title = "Clustering Result")
 
 g3 # Plot of clustering result
-```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
 
-``` r
 # External cluster validation
 z_true <- cor.sim$z_true
 
@@ -116,11 +85,9 @@ ARI(z_true, clust_res_arranged) # = 1, perfect agreement
 NMI(z_true, clust_res_arranged) # = 1, perfect agreement
 NVI(z_true, clust_res_arranged) # = 0, perfect agreement
 
-```
+######################## Real Data Analysis #################################
 
-## Real Data Analysis
 
-``` r
 # Loading Count Table
 data <- read.table("Data/Species_Count_Data.txt", header = T)
 
@@ -176,10 +143,6 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
 
 ggarrange(g4, g5)
 
-```
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
-
-``` r
 # Estimation of K
 
 K_est <- apply(res$z_store, 1, function(i){
@@ -189,9 +152,8 @@ K_est <- apply(res$z_store, 1, function(i){
 par(mfrow = c(1, 2))
 barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K")
 plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
-```
 
-![alt text](https://github.com/tejasvbedi95/BayesSMEG/blob/5826af4199a8a775b499cf6354f0d1429ac79dbb/figures/cp_detection.png)
+
 
 
 
