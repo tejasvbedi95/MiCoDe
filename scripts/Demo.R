@@ -7,7 +7,8 @@ library(MASS)
 library(ggpubr)
 
 # Load functions
-sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM
+sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM (auto)
+sourceCpp("scripts/SBM_cpp_v2.4.cpp") # CPP function for WSBM (fixed)
 source("scripts/functions.R")
 
 ######################## Simulation Study #################################
@@ -152,6 +153,24 @@ K_est <- apply(res$z_store, 1, function(i){
 par(mfrow = c(1, 2))
 barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K")
 plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
+
+################ Using WSBM wrapper function with relabeling
+
+data <- read.table("Data/Species_Count_Data.txt", header = T)
+
+res <- WSBM_wrapper(data)
+clust_res <- res$cluster_labels
+
+clust_res_2 <- clust_relabel(clust_res)
+cor_mat <- res$cor_mat
+
+summary(as.factor(clust_res))
+summary(as.factor(clust_res_2))
+
+
+
+
+
 
 
 
