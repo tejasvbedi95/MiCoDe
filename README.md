@@ -76,7 +76,7 @@ g2 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col)) +
 
 ggarrange(g1, g2)
 ```
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/d6db528a88ba481989d462823cb32c23f459c238/Results/sim_plot_1.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/sim_plot_1.pdf)
 
 ``` r
 # Fit the permutated data to WSBM function
@@ -85,8 +85,8 @@ res <- auto_WSBM(cor.mat.temp, K_max = 20, eta0 = 1, store = T)
 
 # Obtaining z_ppm (clustering result)
 
-diag(res$ppm_store) <- 1000
-clust_res <- minbinder(res$ppm_store/1000, method = "comp")$cl
+diag(res$ppm_store) <- 500
+clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
 
 names(clust_res) <- sample_id
 clust_res_arranged <- clust_res[order(as.numeric(names(clust_res)))]
@@ -106,7 +106,7 @@ g3 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col)) +
 
 g3 # Plot of clustering result
 ```
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/d6db528a88ba481989d462823cb32c23f459c238/Results/sim_plot_2.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/869feea52aacf5367593158f11f446f9c3f0c003/plots/Pearson/DM_pearson_CLR_auto.png)
 
 ``` r
 # External cluster validation
@@ -119,10 +119,9 @@ NVI(z_true, clust_res_arranged) # = 0, perfect agreement
 ```
 
 ## Real Data Analysis
-
 ``` r
 # Loading Count Table
-data <- read.table("Data/Species_Count_Data.txt", header = T)
+data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
 
 # Calculating spearman correlation on CLR transformed data
 cor_data <- count_to_cor(data, method = "spearman")$CLR 
@@ -146,12 +145,12 @@ g4 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col, fill = Correlation)) +
 
 # Fitting WSBM model
 
-res <- auto_WSBM(cor_data, 20, 0.05, T)
+res <- auto_WSBM(cor_data, 20, 1, T)
 
-diag(res$ppm_store) <- 1000
-clust_res <- minbinder(res$ppm_store/1000, method = "comp")$cl
+diag(res$ppm_store) <- 500
+clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
 
-ppm_mat <- res$ppm_store/1000
+ppm_mat <- res$ppm_store/500
 colnames(ppm_mat) <- rownames(ppm_mat) <- colnames(cor_data)
 ## write.csv(ppm_mat, file = "Results/CLR_ppm.csv")
 
@@ -167,7 +166,7 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
   geom_tile(color = "white", size = 0.25) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90, size = 5),
-        axis.text.y = element_text(size = 5)) +
+        axis.text.y = element_text(size = 4.5)) +
   labs(x="", y="") +
   scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
   geom_hline(yintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
@@ -177,21 +176,20 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
 ggarrange(g4, g5)
 
 ```
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/d6db528a88ba481989d462823cb32c23f459c238/Results/res_plot_1.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/95f873bdb9491a9b513551f7f9831b5a9d4f0ff4/Results/res_plot_1.pdf)
+
+###Using WSBM wrapper function
+
+#### This function enables user to input the raw counts data and obtain the above results
 
 ``` r
-# Estimation of K
+data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
 
-K_est <- apply(res$z_store, 1, function(i){
-  length(unique(i))
-})
+res <- WSBM_wrapper(data, K = "auto", cor = "spearman", transform = T)
+clust_res <- res$cluster_labels
 
-par(mfrow = c(1, 2))
-barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K")
-plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
 ```
 
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/d6db528a88ba481989d462823cb32c23f459c238/Results/res_plot_2.png)
 
 
 
