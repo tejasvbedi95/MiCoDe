@@ -39,52 +39,118 @@ WSBM_sim <- function(n = 100, K = 4, mu_true, var_true = matrix(0.1, K, K),
   
 }
 
+# Geometric Mean
+
+gm_fun <- function(x){ # geometric mean function
+  return(exp((1/length(x))*sum(log(x))))
+}
+
 # Converting taxon abundance count data to correlation matrix for compositional & CLR settings
 
 count_to_cor <- function(data, method = "spearman"){
-  
-  # Discarding taxa with < 5% +ve counts (filteration step)
-  
+
+  # Discarding taxa with < 3 +ve counts (filteration step)
+
   data.ind <- apply(data, 2, function(i){
     ifelse(i > 0, 1, 0)
   })
-  
-  taxa.names <- names(which(apply(data.ind, 2, mean) > 0.05))
-  
+
+  taxa.names <- names(which(apply(data.ind, 2, sum) >= 3))
+
   data <- data[, taxa.names]
-  
+
+
   # Compositional Data
   data.comp <- data/rowSums(data)
   cor_comp <- as.matrix(cor(data.comp, method = method))
   diag(cor_comp) <- 0
-  
+
   if(any(cor_comp == 1)){ # Fisher transformation fails if correlation exactly equals 1 or -1
     cor_comp <- cor_comp - 0.000001
   }
   diag(cor_comp) <- 0
-  
+
   # CLR Transformation
   data.CLR <- data/rowSums(data) + 1e-7 # adding pseudocount to avoid 0 for geometric mean
   data.CLR <- data.CLR/rowSums(data.CLR) # rescaling again
-  
-  gm_fun <- function(x){ # geometric mean function
-    return(exp((1/length(x))*sum(log(x))))
-  }
-  
+
   CLR_data <- NULL
   for(i in 1:nrow(data.CLR)){
     CLR_data <- rbind(CLR_data, log(data.CLR[i,]/gm_fun(data.CLR[i,])))
   }
-  
+
   cor_CLR <- as.matrix(cor(CLR_data, method = method))
   diag(cor_CLR) <- 0
-  
+
   if(any(cor_CLR == 1)){ # Fisher transformation fails if correlation exactly equals 1 or -1
     cor_CLR <- cor_CLR - 0.000001
   }
   diag(cor_CLR) <- 0
-  
+
   return(list(comp = cor_comp, CLR = cor_CLR))
+}
+
+# WSBM Wrapper function
+
+WSBM_wrapper <- function(data, K = "auto", cor = "spearman", transform = T,
+                         K_max = 20, alpha = 1){
+  
+  require(mcclust)
+  require(Rcpp)
+  
+  # Load functions
+  Rcpp::sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM (auto)
+  Rcpp::sourceCpp("scripts/SBM_cpp_v2.4.cpp") # CPP function for WSBM (fixed)
+  source("scripts/functions.R")
+  
+  # data = n by p taxonomic abundance count table
+  # K = "auto" for automatic inference, numeric values between 2 - 10 for fixed communities
+  # cor = spearman / pearson correlation method
+  # transform = TRUE for CLR transformation on count table
+  # K_max = max value of K if K_max = "auto"
+  # alpha = DP concentration parameter if K_max = "auto"
+  # OUTPUT: a list of correlation matrix and community label vector
+  
+  if(transform){
+    if(cor == "spearman"){
+      cor_data <- count_to_cor(data, method = "spearman")$CLR
+    }else{
+      cor_data <- count_to_cor(data, method = "pearson")$CLR
+    }
+  }else{
+    if(cor == "spearman"){
+      cor_data <- count_to_cor(data, method = "spearman")$comp
+    }else{
+      cor_data <- count_to_cor(data, method = "pearson")$comp
+    }
+  }
+  
+  if(K == "auto"){
+    res <- auto_WSBM(cor_data, K_max, alpha, T)
+    diag(res$ppm_store) <- 500
+    clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
+  }else{
+    if(K < 2 | K > 10){
+      stop("Enter the value of K b/w 2 and 10 or choose 'auto' ")
+    }else{
+      res <- WSBM(cor_data, K, T)
+      clust_res <- res$z+1
+    }
+  }
+  
+  # Relabel clusters so that the smallest label has the largest no. of observations
+  
+  # browser()
+  
+  # names(clust_res) <- 1:length(clust_res)
+  # clust_res_temp <- clust_res
+  # clust_true_factor <- as.factor(clust_res_temp)
+  # recode_levels <- names(sort(summary(as.factor(clust_res_temp)), T))
+  # levels(clust_true_factor) <- recode_levels
+  # clust_res <- as.numeric(as.character(clust_true_factor))
+  
+  return(list(cor_mat = cor_data, cluster_labels = clust_res))
+  
 }
 
 
@@ -187,7 +253,35 @@ ARI <- function(clust_true, clust_est){ # Adjusted rand index
 }
 
 
+## WORK IN PROGRESS
 
+# clust_relabel <- function(clust_res){
+#   
+#   # browser()
+#   names(clust_res) <- 1:length(clust_res)
+#   clust_res_temp <- clust_res
+#   clust_true_factor <- as.factor(clust_res_temp)
+#   recode_levels <- names(sort(summary(as.factor(clust_res_temp)), T))
+#   levels(clust_true_factor) <- recode_levels
+#   clust_res <- as.numeric(as.character(clust_true_factor))
+#   
+#   return(clust_res)
+# }
+# 
+# ss <- summary(as.factor(clust_res))
+# 
+# for(i in 1:length(unique(clust_res))){
+#   if(all(ss[i] > ss[-i])){
+#     clust_res[which(clust_res == i)] <- i
+#   }
+# }
+# 
+# 
+# 
+# 
+# summary(as.factor(clust_true_factor))
+# 
+# clust_res_temp[order(levels(as.factor(clust_res_temp)))]
 
 
 

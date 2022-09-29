@@ -58,8 +58,8 @@ res <- auto_WSBM(cor.mat.temp, K_max = 20, eta0 = 1, store = T)
 
 # Obtaining z_ppm (clustering result)
 
-diag(res$ppm_store) <- 1000
-clust_res <- minbinder(res$ppm_store/1000, method = "comp")$cl
+diag(res$ppm_store) <- 500 # no. of iterations after burn-in
+clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
 
 names(clust_res) <- sample_id
 clust_res_arranged <- clust_res[order(as.numeric(names(clust_res)))]
@@ -90,7 +90,7 @@ NVI(z_true, clust_res_arranged) # = 0, perfect agreement
 
 
 # Loading Count Table
-data <- read.table("Data/Species_Count_Data.txt", header = T)
+data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
 
 # Calculating spearman correlation on CLR transformed data
 cor_data <- count_to_cor(data, method = "spearman")$CLR 
@@ -114,12 +114,12 @@ g4 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col, fill = Correlation)) +
 
 # Fitting WSBM model
 
-res <- auto_WSBM(cor_data, 20, 0.05, T)
+res <- auto_WSBM(cor_data, 20, 1, T)
 
-diag(res$ppm_store) <- 1000
-clust_res <- minbinder(res$ppm_store/1000, method = "comp")$cl
+diag(res$ppm_store) <- 500
+clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
 
-ppm_mat <- res$ppm_store/1000
+ppm_mat <- res$ppm_store/500
 colnames(ppm_mat) <- rownames(ppm_mat) <- colnames(cor_data)
 ## write.csv(ppm_mat, file = "Results/CLR_ppm.csv")
 
@@ -135,14 +135,14 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
   geom_tile(color = "white", size = 0.25) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90, size = 5),
-        axis.text.y = element_text(size = 5)) +
+        axis.text.y = element_text(size = 4.5)) +
   labs(x="", y="") +
   scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
   geom_hline(yintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
   geom_vline(xintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
   labs(title = "Clustered Correlation Matrix")
 
-ggarrange(g4, g5)
+g5
 
 # Estimation of K
 
@@ -154,30 +154,13 @@ par(mfrow = c(1, 2))
 barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K")
 plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
 
-################ Using WSBM wrapper function with relabeling
+## Using WSBM wrapper function
 
-data <- read.table("Data/Species_Count_Data.txt", header = T)
+### This function allows user to input the raw counts data and obtain the above results
+data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
 
 res <- WSBM_wrapper(data)
 clust_res <- res$cluster_labels
-
-clust_res_2 <- clust_relabel(clust_res)
-cor_mat <- res$cor_mat
-
-summary(as.factor(clust_res))
-summary(as.factor(clust_res_2))
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
