@@ -33,9 +33,9 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
   Var.fill(0.1);
   double LogL = 0.0;
   double SS0 = 0.1, nu0 = 10.0, mu0 = 0.0, n0 = 1.0;
-  //int K_start = randi(1, distr_param(1, K))(0);
-  //Col<int> z = randi(n, distr_param(0, K_start - 1));
-  Col<int> z(n, fill::zeros);
+  int K_start = randi(1, distr_param(2, K))(0);
+  Col<int> z = randi(n, distr_param(0, K_start - 1));
+  //Col<int> z(n, fill::zeros);
   Col<int> z_temp = z;
   Mat<int> ppm_store(n, n, fill::zeros);
   
@@ -52,8 +52,8 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
   
   // Store
   //Mat<int> z_store(n*iter, n, fill::zeros);
-  //Mat<int> z_store(iter - burn, n, fill::zeros);
-  Mat<int> z_store(iter, n, fill::zeros);
+  Mat<int> z_store(iter - burn, n, fill::zeros);
+  //Mat<int> z_store(iter, n, fill::zeros);
   //Col<double> logprob_store(iter, fill::zeros);
   Cube<double> mu_store(K, K, iter - burn, fill::zeros);
   Cube<double> var_store(K, K, iter - burn, fill::zeros);
@@ -265,24 +265,26 @@ Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
     
     // Take the inv-fisher transformation of mu for interpretation
     if(store){
-      z_store.row(it) = z.t();
+      //z_store.row(it) = z.t();
       if(it >= burn){
-        //z_store.row(it - burn) = z.t();
+        z_store.row(it - burn) = z.t();
         mu_store.slice(it - burn) = mu;
         var_store.slice(it - burn) = Var;
-      }
-      // Update PPM
-      
-      for(int i = 0; i < n; i++){
-        for(int ii = i; ii < n; ii++){
-          if(ii != i){
-            if(z_store(it, ii) == z_store(it, i)){
-              ppm_store(i, ii) = ppm_store(i, ii) + 1;
-              ppm_store(ii, i) = ppm_store(ii, i) + 1;
+        
+        // Update PPM
+        
+        for(int i = 0; i < n; i++){
+          for(int ii = i; ii < n; ii++){
+            if(ii != i){
+              if(z_store(it - burn, ii) == z_store(it - burn, i)){
+                ppm_store(i, ii) = ppm_store(i, ii) + 1;
+                ppm_store(ii, i) = ppm_store(ii, i) + 1;
+              }
             }
           }
         }
       }
+
       
     }
     
