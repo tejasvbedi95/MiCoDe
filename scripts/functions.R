@@ -78,7 +78,9 @@ count_to_cor <- function(data, method = "spearman"){
   for(i in 1:nrow(data.CLR)){
     CLR_data <- rbind(CLR_data, log(data.CLR[i,]/gm_fun(data.CLR[i,])))
   }
-
+  
+  # browser()
+  # write.csv(CLR_data, file = "Results/CLR_raw.csv", row.names = T)
   cor_CLR <- as.matrix(cor(CLR_data, method = method))
   diag(cor_CLR) <- 0
 
@@ -92,62 +94,66 @@ count_to_cor <- function(data, method = "spearman"){
 
 # WSBM Wrapper function
 
-WSBM_wrapper <- function(data, K = "auto", cor = "spearman", transform = T,
-                         K_max = 20, alpha = 1){
+WSBM_wrapper <- function(data, K = "auto", cor = "SPR", transform = "MCLR",
+                         K_max = 20, alpha_v = rep(1, K), eta0 = 1){
   
   require(mcclust)
   require(Rcpp)
+  require(SPRING)
   
   # Load functions
   Rcpp::sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM (auto)
-  Rcpp::sourceCpp("scripts/SBM_cpp_v2.4.cpp") # CPP function for WSBM (fixed)
+  Rcpp::sourceCpp("scripts/SBM_cpp_v2.5.cpp") # CPP function for WSBM (fixed)
   source("scripts/functions.R")
   
   # data = n by p taxonomic abundance count table
   # K = "auto" for automatic inference, numeric values between 2 - 10 for fixed communities
-  # cor = spearman / pearson correlation method
-  # transform = TRUE for CLR transformation on count table
+  # cor = SPR / spearman / pearson correlation method
+  # transform = MCLR (Modified CLR transformation) / CLR / none 
   # K_max = max value of K if K_max = "auto"
-  # alpha = DP concentration parameter if K_max = "auto"
+  # eta0 = DP concentration parameter if K = "auto"
+  # alpha_v = Dirichlet Prior hyperparameter if K is numeric (fixed)
   # OUTPUT: a list of correlation matrix and community label vector
   
-  if(transform){
+  if(transform == "CLR"){
     if(cor == "spearman"){
       cor_data <- count_to_cor(data, method = "spearman")$CLR
     }else{
       cor_data <- count_to_cor(data, method = "pearson")$CLR
     }
-  }else{
+  }else if(transform == "none"){
     if(cor == "spearman"){
       cor_data <- count_to_cor(data, method = "spearman")$comp
     }else{
       cor_data <- count_to_cor(data, method = "pearson")$comp
     }
+  }else if(transform == "MCLR"){
+    mclr_data <- SPRING::mclr(data)
+    if(cor == "SPR"){
+      cor_data <- suppressWarnings(mixedCCA::estimateR(mclr_data, type = "trunc", method = "approx")$R)
+      diag(cor_data) <- 0
+    }else if(cor == "spearman"){
+      cor_data <- cor(mclr_data, method = "spearman")
+      diag(cor_data) <- 0
+    }else if(cor == "pearson"){
+      cor_data <- cor(mclr_data, method = "pearson")
+      diag(cor_data) <- 0
+    }
+    
   }
   
   if(K == "auto"){
-    res <- auto_WSBM(cor_data, K_max, alpha, T)
+    res <- auto_WSBM(cor_data, K_max, eta0, T)
     diag(res$ppm_store) <- 500
     clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
   }else{
     if(K < 2 | K > 10){
       stop("Enter the value of K b/w 2 and 10 or choose 'auto' ")
     }else{
-      res <- WSBM(cor_data, K, T)
+      res <- WSBM(cor_data, K, alpha_v, T)
       clust_res <- res$z+1
     }
   }
-  
-  # Relabel clusters so that the smallest label has the largest no. of observations
-  
-  # browser()
-  
-  # names(clust_res) <- 1:length(clust_res)
-  # clust_res_temp <- clust_res
-  # clust_true_factor <- as.factor(clust_res_temp)
-  # recode_levels <- names(sort(summary(as.factor(clust_res_temp)), T))
-  # levels(clust_true_factor) <- recode_levels
-  # clust_res <- as.numeric(as.character(clust_true_factor))
   
   return(list(cor_mat = cor_data, cluster_labels = clust_res))
   
