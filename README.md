@@ -21,7 +21,8 @@ library(SPRING)
 ## Required Functions
 
 ```r
-sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM
+sourceCpp("scripts/SBM_cpp_v3.4.cpp") # CPP function for WSBM (auto)
+sourceCpp("scripts/SBM_cpp_v2.5.cpp") # CPP function for WSBM (fixed)
 source("scripts/functions.R")
 ```
 
@@ -35,7 +36,7 @@ The following are the data components and model parameters:
 -   `z`: Latent community membership vector
 -   `mu`: Matrix of weighted block means
 -   `var`: Matrix of weighted block variance
--   `Kmax`: Upper bound over K
+-   `K_max`: Upper bound over K
 -   `eta0`: Dirichlet process concentration parameter 
 
 
@@ -124,6 +125,7 @@ NVI(z_true, clust_res_arranged) # = 0, perfect agreement
 
 ## Real Data Analysis
 ``` r
+
 # Load the synthetic count data
 data <- read.csv("metaphlan_qc.csv", header = T)
 data <- data[, -c(1:2)]
@@ -131,7 +133,7 @@ data <- data[, -c(1:2)]
 # Model Fitting via MCLR transformation and SPR correlation with automatic community detection
 
 res <- WSBM_wrapper(data, K = "auto", cor = "SPR", transform = "MCLR",
-                         K_max = 20, alpha = 0.1)
+                         K_max = 20, eta0 = 0.1)
 
 W_data_temp <- cbind(order = res$cluster_labels, res$cor_mat)
 W_data_order <- W_data_temp[, -1][order(W_data_temp[, 1]), order(W_data_temp[, 1])]
