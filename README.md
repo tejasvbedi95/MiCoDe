@@ -176,7 +176,7 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
 ggarrange(g4, g5)
 
 ```
-![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/41c32bb3b7c1deca1489dc75137cbe648c73b835/Results/res_plot_1.png)
+![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/6e7e1805597ef256516af70c0fa26dd517af8565/Results/res_plot_1.png)
 
 ###Using WSBM wrapper function
 
