@@ -1,83 +1,3 @@
-
-# 
-# 
-# # Loading Count Table
-# data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
-# 
-# # Calculating spearman correlation on CLR transformed data
-# cor_data <- count_to_cor(data, method = "spearman")$CLR 
-# 
-# ## write.csv(cor_data, file = "Results/CLR_corr.csv", row.names = T)
-# 
-# # Visualizing the data
-# 
-# cor.mat.melt <- reshape2::melt(cor_data)
-# colnames(cor.mat.melt) <- c("Row", "Col", "Correlation")
-# 
-# g4 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col, fill = Correlation)) +
-#   geom_tile(color = "white", size = 0.25) +
-#   theme_light() +
-#   theme(axis.text.x = element_text(angle = 90, size = 5),
-#         axis.text.y = element_text(size = 5)) +
-#   labs(x="", y="") +
-#   scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
-#   labs(title = "Raw Correlation Matrix")
-#   
-# 
-# # Fitting WSBM model
-# 
-# res <- auto_WSBM(cor_data, 20, 1, T)
-# 
-# diag(res$ppm_store) <- 500
-# clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
-# 
-# ppm_mat <- res$ppm_store/500
-# colnames(ppm_mat) <- rownames(ppm_mat) <- colnames(cor_data)
-# ## write.csv(ppm_mat, file = "Results/CLR_ppm.csv")
-# 
-# W_data_temp <- cbind(order = clust_res, cor_data)
-# W_data_order <- W_data_temp[, -1][order(W_data_temp[, 1]), order(W_data_temp[, 1])]
-# 
-# sort_vec <- cumsum(tapply(sort(clust_res), as.factor(sort(clust_res)), length)) + 0.5
-# 
-# cor.res.melt <- reshape2::melt(W_data_order)
-# colnames(cor.res.melt) <- c("Row", "Col", "Correlation")
-# 
-# g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
-#   geom_tile(color = "white", size = 0.25) +
-#   theme_light() +
-#   theme(axis.text.x = element_text(angle = 90, size = 5),
-#         axis.text.y = element_text(size = 4.5)) +
-#   labs(x="", y="") +
-#   scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
-#   geom_hline(yintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
-#   geom_vline(xintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
-#   labs(title = "Clustered Correlation Matrix")
-# 
-# ggarrange(g4, g5)
-# 
-# # Estimation of K
-# 
-# K_est <- apply(res$z_store, 1, function(i){
-#   length(unique(i))
-# })
-# 
-# par(mfrow = c(1, 2))
-# barplot(table(K_est), xlab = "K", ylab = "Frequency", main = "Distribution of K")
-# plot(K_est, type = "l", xlab = "Iteration", ylab = "K", main = "Trace plot of K")
-# 
-# ## Using WSBM wrapper function
-# 
-# ### This function allows user to input the raw counts data and obtain the above results
-# data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
-# 
-# res <- WSBM_wrapper(data)
-# clust_res <- res$cluster_labels
-#
-#############################################################################################
-
-
-
 # Install packages from Github
 
 # remotes::install_github("GraceYoon/SPRING") (for MAC)
@@ -91,8 +11,6 @@ library(mcclust)
 library(MASS)
 library(ggpubr)
 library(SPRING)
-library(doParallel)
-library(foreach)
 
 
 # Load functions
