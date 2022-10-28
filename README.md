@@ -7,11 +7,15 @@ The following script is used to fit a Weighted Stochastic Infinite Block Model (
 ## Required Packages
 
 ```r
+# remotes::install_github("GraceYoon/SPRING") (for MAC)
+# devtools::install_github("GraceYoon/SPRING") (for Windows)
+
 library(Rcpp)
 library(tidyverse)
 library(mcclust)
 library(MASS)
 library(ggpubr)
+library(SPRING)
 ```
 
 ## Required Functions
@@ -120,44 +124,35 @@ NVI(z_true, clust_res_arranged) # = 0, perfect agreement
 
 ## Real Data Analysis
 ``` r
-# Loading Count Table
-data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
+# Load the synthetic count data
+data <- read.csv("metaphlan_qc.csv", header = T)
+data <- data[, -c(1:2)]
 
-# Calculating spearman correlation on CLR transformed data
-cor_data <- count_to_cor(data, method = "spearman")$CLR 
+# Model Fitting via MCLR transformation and SPR correlation with automatic community detection
 
-## write.csv(cor_data, file = "Results/CLR_corr.csv", row.names = T)
+res <- WSBM_wrapper(data, K = "auto", cor = "SPR", transform = "MCLR",
+                         K_max = 20, alpha = 0.1)
 
-# Visualizing the data
+W_data_temp <- cbind(order = res$cluster_labels, res$cor_mat)
+W_data_order <- W_data_temp[, -1][order(W_data_temp[, 1]), order(W_data_temp[, 1])]
 
-cor.mat.melt <- reshape2::melt(cor_data)
-colnames(cor.mat.melt) <- c("Row", "Col", "Correlation")
+sort_vec <- cumsum(tapply(sort(res$cluster_labels), as.factor(sort(res$cluster_labels)), length)) + 0.5
 
-g4 <- ggplot(data = cor.mat.melt, aes(x = Row, y = Col, fill = Correlation)) +
+cor.res.melt <- reshape2::melt(res$cor_mat)
+colnames(cor.res.melt) <- c("Row", "Col", "Correlation")
+
+# Raw data 
+
+g4 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
   geom_tile(color = "white", size = 0.25) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90, size = 5),
-        axis.text.y = element_text(size = 5)) +
+        axis.text.y = element_text(size = 4)) +
   labs(x="", y="") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
-  labs(title = "Raw Correlation Matrix")
+  scale_fill_gradient2(low = "pink", mid = "white", high = "green", limits = c(-1, 1)) +
+  labs(title = "Real Data")
   
-
-# Fitting WSBM model
-
-res <- auto_WSBM(cor_data, 20, 1, T)
-
-diag(res$ppm_store) <- 500
-clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
-
-ppm_mat <- res$ppm_store/500
-colnames(ppm_mat) <- rownames(ppm_mat) <- colnames(cor_data)
-## write.csv(ppm_mat, file = "Results/CLR_ppm.csv")
-
-W_data_temp <- cbind(order = clust_res, cor_data)
-W_data_order <- W_data_temp[, -1][order(W_data_temp[, 1]), order(W_data_temp[, 1])]
-
-sort_vec <- cumsum(tapply(sort(clust_res), as.factor(sort(clust_res)), length)) + 0.5
+# Clustered data after fitting WSBM
 
 cor.res.melt <- reshape2::melt(W_data_order)
 colnames(cor.res.melt) <- c("Row", "Col", "Correlation")
@@ -166,29 +161,19 @@ g5 <- ggplot(data = cor.res.melt, aes(x = Row, y = Col, fill = Correlation)) +
   geom_tile(color = "white", size = 0.25) +
   theme_light() +
   theme(axis.text.x = element_text(angle = 90, size = 5),
-        axis.text.y = element_text(size = 4.5)) +
+        axis.text.y = element_text(size = 4)) +
   labs(x="", y="") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "green", limits = c(-1, 1)) +
+  scale_fill_gradient2(low = "pink", mid = "white", high = "green", limits = c(-1, 1)) +
   geom_hline(yintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
   geom_vline(xintercept = sort_vec, size = 0.7, linetype = "dashed", col = "red", alpha = 0.4) +
-  labs(title = "Clustered Correlation Matrix")
+  labs(title = "Clustering Result")
 
 ggarrange(g4, g5)
+
 
 ```
 ![alt text](https://github.com/tejasvbedi95/MicrobiomeNetworkAnalysis/blob/6e7e1805597ef256516af70c0fa26dd517af8565/Results/res_plot_1.png)
 
-###Using WSBM wrapper function
-
-#### This function enables user to input the raw counts data and obtain the above results
-
-``` r
-data <- read.csv("Data/metaphlan_qc.csv", header = T)[, -c(1:2)]
-
-res <- WSBM_wrapper(data, K = "auto", cor = "spearman", transform = T)
-clust_res <- res$cluster_labels
-
-```
 
 
 
