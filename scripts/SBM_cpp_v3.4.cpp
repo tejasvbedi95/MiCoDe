@@ -18,7 +18,7 @@ static double logsumexp(Col<double> x);
 // [[Rcpp::export]]
 Rcpp::List auto_WSBM(Mat<double> W, int K_max, double eta0, bool store) {
   
-  int iter = 1000, burn = 0.5*iter, K = K_max;
+  int iter = 10000, burn = 0.5*iter, K = K_max;
   Mat<double> W_f = fisher(W);
   
   // Initialization
