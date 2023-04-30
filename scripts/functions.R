@@ -49,13 +49,13 @@ gm_fun <- function(x){ # geometric mean function
 
 count_to_cor <- function(data, method = "spearman"){
 
-  # Discarding taxa with < 3 +ve counts (filteration step)
+  # Discarding taxa with < 5% +ve counts (filteration step)
 
   data.ind <- apply(data, 2, function(i){
     ifelse(i > 0, 1, 0)
   })
 
-  taxa.names <- names(which(apply(data.ind, 2, sum) >= 3))
+  taxa.names <- names(which(apply(data.ind, 2, mean) >= 0.05))
 
   data <- data[, taxa.names]
 
@@ -95,7 +95,7 @@ count_to_cor <- function(data, method = "spearman"){
 # WSBM Wrapper function
 
 WSBM_wrapper <- function(data, K = "auto", cor = "SPR", transform = "MCLR",
-                         K_max = 20, alpha_v = rep(1, K), eta0 = 1){
+                         K_max = 20, alpha_v = rep(1, K), eta0 = 0.1){
   
   require(mcclust)
   require(Rcpp)
@@ -128,6 +128,16 @@ WSBM_wrapper <- function(data, K = "auto", cor = "SPR", transform = "MCLR",
       cor_data <- count_to_cor(data, method = "pearson")$comp
     }
   }else if(transform == "MCLR"){
+    
+    data.ind <- apply(data, 2, function(i){
+      ifelse(i > 0, 1, 0)
+    })
+
+    taxa.names <- names(which(apply(data.ind, 2, mean) >= 0.05))
+
+    data <- data[, taxa.names]
+
+    # browser()
     mclr_data <- SPRING::mclr(data)
     if(cor == "SPR"){
       cor_data <- suppressWarnings(mixedCCA::estimateR(mclr_data, type = "trunc", method = "approx")$R)
@@ -144,8 +154,8 @@ WSBM_wrapper <- function(data, K = "auto", cor = "SPR", transform = "MCLR",
   
   if(K == "auto"){
     res <- auto_WSBM(cor_data, K_max, eta0, T)
-    diag(res$ppm_store) <- 500
-    clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
+    diag(res$ppm_store) <- 5000
+    clust_res <- minbinder(res$ppm_store/5000, method = "comp")$cl
   }else{
     if(K < 2 | K > 10){
       stop("Enter the value of K b/w 2 and 10 or choose 'auto' ")
