@@ -65,8 +65,8 @@ res <- auto_WSBM(cor.mat.temp, K_max = 20, eta0 = 1, store = T)
 
 # Obtaining z_ppm (clustering result)
 
-diag(res$ppm_store) <- 500 # no. of iterations after burn-in
-clust_res <- minbinder(res$ppm_store/500, method = "comp")$cl
+diag(res$ppm_store) <- 5000 # no. of iterations after burn-in
+clust_res <- minbinder(res$ppm_store/5000, method = "comp")$cl
 
 names(clust_res) <- sample_id
 clust_res_arranged <- clust_res[order(as.numeric(names(clust_res)))]
