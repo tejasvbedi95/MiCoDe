@@ -1,4 +1,4 @@
-# Fisher transformation functions
+## Fisher transformation functions
 
 fisher <- function(r){
   return(0.5 * log((1 + r)/(1 - r)))
