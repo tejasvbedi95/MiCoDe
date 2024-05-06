@@ -3,7 +3,7 @@
 # remotes::install_github("GraceYoon/SPRING") (for MAC)
 # devtools::install_github("GraceYoon/SPRING") (for Windows)
 
-# Load Libraries
+## Load Libraries
 
 library(Rcpp)
 library(tidyverse)
